@@ -57,6 +57,7 @@ func main() {
 		githubRepoFlag         = flag.String("github-repo", getEnvOrDefault("GITHUB_REPO", ""), "GitHub repository (e.g. maxisoft-gaming/WowAHaha)")
 		githubWorkflowIDFlag   = flag.String("github-workflow-id", getEnvOrDefault("GITHUB_WORKFLOW_ID", "run_every_hour.yml"), "GitHub workflow filename or ID")
 		githubRefFlag          = flag.String("github-ref", getEnvOrDefault("GITHUB_REF", "main"), "GitHub branch/ref for workflow dispatch")
+		workflowInputsFlag     = flag.String("workflow-inputs", getEnvOrDefault("GITHUB_WORKFLOW_INPUTS", ""), "Optional workflow dispatch inputs (key=value,key2=value2)")
 		noGithubDispatchFlag   = flag.Bool("no-github-dispatch", getEnvBool("DISABLE_GITHUB_DISPATCH", false), "Disable GitHub Actions workflow dispatch")
 		debounceIntervalFlag   = flag.Duration("debounce-interval", 2*time.Minute, "Debounce interval between workflow dispatches (e.g. 2m)")
 
@@ -246,13 +247,7 @@ func main() {
 				triggerReason = reason
 
 				if shouldDispatch {
-					inputs := map[string]interface{}{}
-					if latestAuctionLM != nil {
-						inputs["bnet_last_modified"] = latestAuctionLM.Format(time.RFC3339)
-					}
-					if updatedRegion != "" {
-						inputs["bnet_updated_region"] = updatedRegion
-					}
+					inputs := parseWorkflowInputs(*workflowInputsFlag)
 
 					if err := githubClient.DispatchWorkflow(ctx, inputs); err != nil {
 						logger.LogError("Failed to dispatch GitHub workflow: %v", err)
@@ -339,4 +334,27 @@ func main() {
 		logger.LogInfo("No change detected.")
 		os.Exit(0)
 	}
+}
+
+func parseWorkflowInputs(raw string) map[string]interface{} {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+	res := make(map[string]interface{})
+	pairs := strings.Split(raw, ",")
+	for _, p := range pairs {
+		kv := strings.SplitN(p, "=", 2)
+		if len(kv) == 2 {
+			k := strings.TrimSpace(kv[0])
+			v := strings.TrimSpace(kv[1])
+			if k != "" {
+				res[k] = v
+			}
+		}
+	}
+	if len(res) == 0 {
+		return nil
+	}
+	return res
 }
