@@ -24,6 +24,7 @@ type RegionState struct {
 }
 
 type AppState struct {
+	HasPendingDispatch   bool                    `json:"has_pending_dispatch"`
 	LastWorkflowDispatch *time.Time              `json:"last_workflow_dispatch,omitempty"`
 	Regions              map[string]*RegionState `json:"regions"`
 }
@@ -129,6 +130,18 @@ func (sm *StateManager) UpdateRegion(region string, st *RegionState) {
 		sm.data.Regions = make(map[string]*RegionState)
 	}
 	sm.data.Regions[region] = st
+}
+
+func (sm *StateManager) HasPendingDispatch() bool {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	return sm.data.HasPendingDispatch
+}
+
+func (sm *StateManager) SetPendingDispatch(pending bool) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	sm.data.HasPendingDispatch = pending
 }
 
 func (sm *StateManager) GetLastWorkflowDispatch() *time.Time {

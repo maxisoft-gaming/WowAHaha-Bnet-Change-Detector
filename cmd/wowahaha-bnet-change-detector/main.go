@@ -175,14 +175,6 @@ func main() {
 		var latestAuctionLM *time.Time
 		var updatedRegion string
 		anyChanged := false
-		anyNeedsDispatch := false
-
-		type regionUpdateInfo struct {
-			hRes           *bnet.HeadCheckResult
-			rChanged       bool
-			rNeedsDispatch bool
-		}
-		regionMap := make(map[string]*regionUpdateInfo)
 
 		for _, region := range cleanRegions {
 			hRes, err := bnetClient.CheckCommoditiesHead(ctx, region)
@@ -194,18 +186,16 @@ func main() {
 
 			prevSt := stateMgr.GetRegion(region)
 			rChanged := false
-			rNeedsDispatch := false
 
 			if prevSt == nil {
-				// No previous state stored
+				// Initial check for this region
 				if cliPrevDate != nil && hRes.LastModified != nil {
 					rChanged = hRes.LastModified.After(*cliPrevDate)
 				} else {
 					rChanged = true
 				}
-				rNeedsDispatch = rChanged
 			} else {
-				// Compare with LastModified stored from last check for rChanged
+				// Compare current HEAD result with stored region state from previous check
 				if hRes.LastModified != nil && prevSt.LastModified != nil {
 					rChanged = hRes.LastModified.After(*prevSt.LastModified)
 				} else if hRes.LastModified != nil && prevSt.LastModified == nil {
@@ -214,17 +204,8 @@ func main() {
 					rChanged = hRes.ETag != prevSt.ETag
 				} else if hRes.ContentLen > 0 && prevSt.ContentLen > 0 {
 					rChanged = hRes.ContentLen != prevSt.ContentLen
-				}
-
-				// Compare with LastDispatchedModified to check if an update is pending dispatch
-				if hRes.LastModified != nil && prevSt.LastDispatchedModified != nil {
-					rNeedsDispatch = hRes.LastModified.After(*prevSt.LastDispatchedModified)
-				} else if hRes.LastModified != nil && prevSt.LastDispatchedModified == nil {
-					rNeedsDispatch = true
-				} else if hRes.ETag != "" && prevSt.LastDispatchedETag != "" {
-					rNeedsDispatch = hRes.ETag != prevSt.LastDispatchedETag
-				} else if prevSt.LastDispatchedModified == nil && prevSt.LastDispatchedETag == "" {
-					rNeedsDispatch = true
+				} else {
+					rChanged = false
 				}
 			}
 
@@ -238,10 +219,6 @@ func main() {
 
 			if rChanged {
 				anyChanged = true
-			}
-
-			if rNeedsDispatch {
-				anyNeedsDispatch = true
 				updatedRegion = region
 				if hRes.LastModified != nil {
 					if latestAuctionLM == nil || hRes.LastModified.After(*latestAuctionLM) {
@@ -250,19 +227,27 @@ func main() {
 				}
 			}
 
-			regionMap[region] = &regionUpdateInfo{
-				hRes:           hRes,
-				rChanged:       rChanged,
-				rNeedsDispatch: rNeedsDispatch,
-			}
+			// Update region state in memory
+			stateMgr.UpdateRegion(region, &state.RegionState{
+				LastModified: hRes.LastModified,
+				ETag:         hRes.ETag,
+				ContentLen:   hRes.ContentLen,
+				LastChecked:  tickTime,
+			})
 		}
 
 		tickRes.Changed = anyChanged
 
+		// If any region changed, mark pending dispatch in state!
+		if anyChanged {
+			stateMgr.SetPendingDispatch(true)
+		}
+
 		actionTriggered := false
 		triggerReason := "none"
 
-		if anyNeedsDispatch || cliPrevDate != nil {
+		// Evaluate dispatch if there is a pending dispatch or CLI date override
+		if stateMgr.HasPendingDispatch() || cliPrevDate != nil {
 			lastDispatch := stateMgr.GetLastWorkflowDispatch()
 
 			// Evaluate GitHub Dispatch
@@ -278,6 +263,7 @@ func main() {
 					} else {
 						actionTriggered = true
 						stateMgr.SetLastWorkflowDispatch(tickTime)
+						stateMgr.SetPendingDispatch(false) // Clear pending dispatch flag on success!
 					}
 				}
 			}
@@ -294,38 +280,12 @@ func main() {
 					logger.LogError("Failed to execute command: %v", err)
 				} else {
 					actionTriggered = true
+					stateMgr.SetPendingDispatch(false) // Clear pending dispatch flag on success!
 					if triggerReason == "none" {
 						triggerReason = "command_executed"
 					}
 				}
 			}
-		}
-
-		// Update state in memory for each region
-		for region, info := range regionMap {
-			prevSt := stateMgr.GetRegion(region)
-
-			var lastDispLM *time.Time
-			var lastDispETag string
-
-			if prevSt != nil {
-				lastDispLM = prevSt.LastDispatchedModified
-				lastDispETag = prevSt.LastDispatchedETag
-			}
-
-			if actionTriggered {
-				lastDispLM = info.hRes.LastModified
-				lastDispETag = info.hRes.ETag
-			}
-
-			stateMgr.UpdateRegion(region, &state.RegionState{
-				LastModified:           info.hRes.LastModified,
-				LastDispatchedModified: lastDispLM,
-				ETag:                   info.hRes.ETag,
-				LastDispatchedETag:     lastDispETag,
-				ContentLen:             info.hRes.ContentLen,
-				LastChecked:            tickTime,
-			})
 		}
 
 		tickRes.ActionTriggered = actionTriggered
