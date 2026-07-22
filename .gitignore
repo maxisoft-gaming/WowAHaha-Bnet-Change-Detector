@@ -6,7 +6,7 @@ dist/
 *.dll
 *.so
 *.dylib
-bnet-change-detector
+/bnet-change-detector
 
 # Test & Coverage Output
 *.out
