@@ -15,10 +15,12 @@ import (
 )
 
 type RegionState struct {
-	LastModified *time.Time `json:"last_modified,omitempty"`
-	ETag         string     `json:"etag,omitempty"`
-	ContentLen   int64      `json:"content_length,omitempty"`
-	LastChecked  time.Time  `json:"last_checked"`
+	LastModified           *time.Time `json:"last_modified,omitempty"`
+	LastDispatchedModified *time.Time `json:"last_dispatched_modified,omitempty"`
+	ETag                   string     `json:"etag,omitempty"`
+	LastDispatchedETag     string     `json:"last_dispatched_etag,omitempty"`
+	ContentLen             int64      `json:"content_length,omitempty"`
+	LastChecked            time.Time  `json:"last_checked"`
 }
 
 type AppState struct {
@@ -112,6 +114,10 @@ func (sm *StateManager) GetRegion(region string) *RegionState {
 	if st.LastModified != nil {
 		lm := *st.LastModified
 		cp.LastModified = &lm
+	}
+	if st.LastDispatchedModified != nil {
+		ldm := *st.LastDispatchedModified
+		cp.LastDispatchedModified = &ldm
 	}
 	return &cp
 }
