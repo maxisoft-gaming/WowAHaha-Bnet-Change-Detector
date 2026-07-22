@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer for WowAHaha Battle.net Change Detector
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=2min
+Unit=bnet-detector-cron.service
+
+[Install]
+WantedBy=timers.target

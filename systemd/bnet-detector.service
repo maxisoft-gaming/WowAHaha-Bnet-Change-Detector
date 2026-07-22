@@ -1,0 +1,31 @@
+[Unit]
+Description=WowAHaha Battle.net Change Detector Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nobody
+Group=nogroup
+ExecStart=/usr/local/bin/bnet-change-detector --mode=loop --interval=60s
+Restart=always
+RestartSec=10
+
+# Hardened Security & Sandbox Settings
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+CapabilityBoundingSet=
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+ReadWritePaths=/var/run /tmp
+
+# Environment file support
+EnvironmentFile=-/etc/default/bnet-change-detector
+
+[Install]
+WantedBy=multi-user.target

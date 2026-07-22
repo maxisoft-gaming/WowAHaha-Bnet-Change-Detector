@@ -1,0 +1,25 @@
+[Unit]
+Description=WowAHaha Battle.net Change Detector Single-Shot Check
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=nobody
+Group=nogroup
+ExecStart=/usr/local/bin/bnet-change-detector --mode=single
+
+# Hardened Security & Sandbox Settings
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+CapabilityBoundingSet=
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+ReadWritePaths=/var/run /tmp
+
+EnvironmentFile=-/etc/default/bnet-change-detector

@@ -1,0 +1,32 @@
+# Binaries & Build Output
+bin/
+dist/
+*.exe
+*.exe.test
+*.dll
+*.so
+*.dylib
+bnet-change-detector
+
+# Test & Coverage Output
+*.out
+*.test
+coverage.txt
+
+# State & Local Files
+*.json.tmp
+state.json
+bnet-change-detector-state.json
+
+# IDEs & Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment & Credentials
+.env
+.env.local
