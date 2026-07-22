@@ -197,12 +197,14 @@ func main() {
 			} else {
 				if hRes.LastModified != nil && prevSt.LastModified != nil {
 					rChanged = hRes.LastModified.After(*prevSt.LastModified)
+				} else if hRes.LastModified != nil && prevSt.LastModified == nil {
+					rChanged = true
 				} else if hRes.ETag != "" && prevSt.ETag != "" {
 					rChanged = hRes.ETag != prevSt.ETag
 				} else if hRes.ContentLen > 0 && prevSt.ContentLen > 0 {
 					rChanged = hRes.ContentLen != prevSt.ContentLen
 				} else {
-					rChanged = true
+					rChanged = false
 				}
 			}
 

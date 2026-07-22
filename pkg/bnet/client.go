@@ -210,11 +210,6 @@ func (c *Client) CheckCommoditiesHead(ctx context.Context, region string) (*Head
 		}
 	}
 
-	// Fallback for Last-Modified if missing but Date header exists
-	if res.LastModified == nil && res.Date != nil {
-		res.LastModified = res.Date
-	}
-
 	return res, nil
 }
 
