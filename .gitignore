@@ -6,6 +6,7 @@ dist/
 *.dll
 *.so
 *.dylib
+/wowahaha-bnet-change-detector
 /bnet-change-detector
 
 # Test & Coverage Output
@@ -16,6 +17,7 @@ coverage.txt
 # State & Local Files
 *.json.tmp
 state.json
+wowahaha-bnet-change-detector-state.json
 bnet-change-detector-state.json
 
 # IDEs & Editors

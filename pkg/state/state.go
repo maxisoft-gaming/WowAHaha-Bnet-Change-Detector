@@ -40,11 +40,11 @@ func DefaultStatePath() string {
 	if runtime.GOOS == "windows" {
 		return ""
 	}
-	// On Linux / POSIX systems, try /var/run/bnet-change-detector/state.json or /tmp
+	// On Linux / POSIX systems, try /var/run/wowahaha-bnet-change-detector-state.json or /tmp
 	if _, err := os.Stat("/var/run"); err == nil {
-		return "/var/run/bnet-change-detector-state.json"
+		return "/var/run/wowahaha-bnet-change-detector-state.json"
 	}
-	return filepath.Join(os.TempDir(), "bnet-change-detector-state.json")
+	return filepath.Join(os.TempDir(), "wowahaha-bnet-change-detector-state.json")
 }
 
 // NewStateManager initializes a StateManager respecting OS defaults and user explicit flags.

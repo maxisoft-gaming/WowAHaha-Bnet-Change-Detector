@@ -74,7 +74,7 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Printf("bnet-change-detector version %s\n", version)
+		fmt.Printf("wowahaha-bnet-change-detector version %s\n", version)
 		os.Exit(0)
 	}
 

@@ -28,4 +28,4 @@ jobs:
         run: go test -v -race ./...
 
       - name: Build Binary Check
-        run: go build ./cmd/bnet-change-detector
+        run: go build ./cmd/wowahaha-bnet-change-detector

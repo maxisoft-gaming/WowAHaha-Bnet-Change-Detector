@@ -1,6 +1,6 @@
 # WowAHaha Battle.net Change Detector
 
-`bnet-change-detector` is a lightweight, open-source (GPL-3.0), high-performance monitoring daemon & CLI tool written in **Go**. It periodically checks World of Warcraft Auction House data across multiple regions via the Battle.net Game Data API (using HTTP `HEAD` requests) and triggers downstream actions—such as a GitHub Actions `workflow_dispatch` event or executing an external local command—with strict rate-limiting, anti-saturation debounce protections, OS-aware state persistence, and minimal resource usage (~5-10MB RAM, <5ms startup time).
+`wowahaha-bnet-change-detector` is a lightweight, open-source (GPL-3.0), high-performance monitoring daemon & CLI tool written in **Go**. It periodically checks World of Warcraft Auction House data across multiple regions via the Battle.net Game Data API (using HTTP `HEAD` requests) and triggers downstream actions—such as a GitHub Actions `workflow_dispatch` event or executing an external local command—with strict rate-limiting, anti-saturation debounce protections, OS-aware state persistence, and minimal resource usage (~5-10MB RAM, <5ms startup time).
 
 ---
 
@@ -12,7 +12,7 @@
 - **External Command Execution**: Spawns custom shell commands (e.g. running a local C# application or container execution) upon change detection.
 - **Subprocess Environment Security**: Secrets (`clientId`, `clientSecret`, `githubToken`) are withheld from subprocess environments by default unless `--pass-secrets-to-command` is explicitly set.
 - **OS-Aware State Persistence**:
-  - **Linux**: Enabled by default targeting `/var/run/bnet-change-detector-state.json`. If IO/permission error occurs, logs a warning and soft-disables state persistence for the remainder of the run.
+  - **Linux**: Enabled by default targeting `/var/run/wowahaha-bnet-change-detector-state.json`. If IO/permission error occurs, logs a warning and soft-disables state persistence for the remainder of the run.
   - **Windows**: Disabled by default.
   - **Explicit User Override**: If `--enable-state` or `--state-file` is explicitly specified by the end-user, any save error becomes a **fatal error**.
 - **1-Line Tick Output**: Diagnostics and logs go strictly to `stderr`, while `stdout` emits exactly **one line per loop tick** (Text or JSON `--output-format json`), making stdout pipeable to `jq` or log collectors.
@@ -43,7 +43,7 @@ Outputs static binaries into `bin/` for Windows (x64, ARM64) and Linux (x64, ARM
 ### Command Line Options
 
 ```
-Usage of bnet-change-detector:
+Usage of wowahaha-bnet-change-detector:
   -mode string
         Execution mode: 'single' (cron/timer) or 'loop' (daemon) (default "single")
   -interval duration
@@ -68,6 +68,8 @@ Usage of bnet-change-detector:
         GitHub repository (e.g. maxisoft-gaming/WowAHaha)
   -github-workflow-id string
         GitHub workflow filename or ID (default "run_every_hour.yml")
+  -workflow-inputs string
+        Optional workflow dispatch inputs (key=value,key2=value2)
   -no-github-dispatch
         Disable GitHub Actions workflow dispatch
   -command string
@@ -99,7 +101,7 @@ All parameters can also be configured via environment variables:
 
 ### Single-Shot (Cron / Systemd Timer)
 ```bash
-bnet-change-detector \
+wowahaha-bnet-change-detector \
   --mode=single \
   --client-id="!enc:..." \
   --client-secret="!enc:..." \
@@ -114,7 +116,7 @@ Exit codes in single-shot mode:
 
 ### Daemon (Loop Mode)
 ```bash
-bnet-change-detector \
+wowahaha-bnet-change-detector \
   --mode=loop \
   --interval=60s \
   --output-format=json
@@ -123,7 +125,7 @@ bnet-change-detector \
 ### Docker / Podman
 ```bash
 docker run -d \
-  --name bnet-detector \
+  --name wowahaha-bnet-detector \
   -e BNET_CLIENT_ID="f5f7235c81384695bef666871e5ca18d" \
   -e BNET_CLIENT_SECRET="!enc:ekM9JgdReFkWXAUGC0lrBx8yeUdDBBwMRA2bB1gcGDI=" \
   -e BNET_CREDENTIAL_ENCRYPTION_KEY="TMP_CHANGE_ME" \

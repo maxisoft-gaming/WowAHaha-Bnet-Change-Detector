@@ -7,7 +7,7 @@ Wants=network-online.target
 Type=oneshot
 User=nobody
 Group=nogroup
-ExecStart=/usr/local/bin/bnet-change-detector --mode=single
+ExecStart=/usr/local/bin/wowahaha-bnet-change-detector --mode=single
 
 # Hardened Security & Sandbox Settings
 ProtectSystem=strict
@@ -22,4 +22,4 @@ MemoryDenyWriteExecute=true
 RestrictRealtime=true
 ReadWritePaths=/var/run /tmp
 
-EnvironmentFile=-/etc/default/bnet-change-detector
+EnvironmentFile=-/etc/default/wowahaha-bnet-change-detector

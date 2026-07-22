@@ -32,13 +32,13 @@ jobs:
           LDFLAGS="-s -w -X main.version=${VERSION}"
           
           # Windows
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build $LDFLAGS -o dist/bnet-change-detector-windows-amd64.exe ./cmd/bnet-change-detector
-          GOOS=windows GOARCH=arm64 CGO_ENABLED=0 go build $LDFLAGS -o dist/bnet-change-detector-windows-arm64.exe ./cmd/bnet-change-detector
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build $LDFLAGS -o dist/wowahaha-bnet-change-detector-windows-amd64.exe ./cmd/wowahaha-bnet-change-detector
+          GOOS=windows GOARCH=arm64 CGO_ENABLED=0 go build $LDFLAGS -o dist/wowahaha-bnet-change-detector-windows-arm64.exe ./cmd/wowahaha-bnet-change-detector
           
           # Linux
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build $LDFLAGS -o dist/bnet-change-detector-linux-amd64 ./cmd/bnet-change-detector
-          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build $LDFLAGS -o dist/bnet-change-detector-linux-arm64 ./cmd/bnet-change-detector
-          GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build $LDFLAGS -o dist/bnet-change-detector-linux-armv7 ./cmd/bnet-change-detector
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build $LDFLAGS -o dist/wowahaha-bnet-change-detector-linux-amd64 ./cmd/wowahaha-bnet-change-detector
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build $LDFLAGS -o dist/wowahaha-bnet-change-detector-linux-arm64 ./cmd/wowahaha-bnet-change-detector
+          GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build $LDFLAGS -o dist/wowahaha-bnet-change-detector-linux-armv7 ./cmd/wowahaha-bnet-change-detector
 
           # Generate SHA256 checksums
           cd dist
