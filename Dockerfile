@@ -10,8 +10,8 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-ARG TARGETOS TARGETARCH
-RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} \
+ARG TARGETOS TARGETARCH TARGETVARIANT
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} GOARM=${TARGETVARIANT#v} \
     go build -ldflags="-s -w -X main.version=docker" -o /wowahaha-bnet-change-detector ./cmd/wowahaha-bnet-change-detector
 
 # Runtime Stage (Alpine base for Docker & Podman)
