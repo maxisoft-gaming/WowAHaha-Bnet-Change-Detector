@@ -229,10 +229,11 @@ func main() {
 			if rChanged {
 				anyChanged = true
 				updatedRegion = region
-				if hRes.LastModified != nil {
-					if latestAuctionLM == nil || hRes.LastModified.After(*latestAuctionLM) {
-						latestAuctionLM = hRes.LastModified
-					}
+			}
+
+			if hRes.LastModified != nil {
+				if latestAuctionLM == nil || hRes.LastModified.After(*latestAuctionLM) {
+					latestAuctionLM = hRes.LastModified
 				}
 			}
 
@@ -273,6 +274,10 @@ func main() {
 						actionTriggered = true
 						stateMgr.SetLastWorkflowDispatch(tickTime)
 						stateMgr.SetPendingDispatch(false) // Clear pending dispatch flag on success!
+					}
+				} else {
+					if strings.HasPrefix(reason, "workflow_already_up_to_date") {
+						stateMgr.SetPendingDispatch(false) // Clear pending dispatch if workflow is already up to date
 					}
 				}
 			}
