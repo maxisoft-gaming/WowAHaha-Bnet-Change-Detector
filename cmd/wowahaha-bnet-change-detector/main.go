@@ -179,8 +179,8 @@ func main() {
 		for _, region := range cleanRegions {
 			hRes, err := bnetClient.CheckCommoditiesHead(ctx, region)
 			if err != nil {
-				logger.LogError("Failed HEAD check for region %s: %v", region, err)
-				tickRes.Error = fmt.Sprintf("bnet_head_error(%s): %v", region, err)
+				logger.LogError("Failed GET check for region %s: %v", region, err)
+				tickRes.Error = fmt.Sprintf("bnet_get_error(%s): %v", region, err)
 				continue
 			}
 
@@ -190,14 +190,23 @@ func main() {
 			if prevSt == nil {
 				// Initial check for this region
 				if cliPrevDate != nil && hRes.LastModified != nil {
-					rChanged = hRes.LastModified.After(*cliPrevDate)
+					diff := hRes.LastModified.Sub(*cliPrevDate)
+					if diff < 0 {
+						diff = -diff
+					}
+					rChanged = diff >= time.Minute
 				} else {
 					rChanged = true
 				}
 			} else {
-				// Compare current HEAD result with stored region state from previous check
+				// Compare current GET result with stored region state from previous check
 				if hRes.LastModified != nil && prevSt.LastModified != nil {
-					rChanged = hRes.LastModified.After(*prevSt.LastModified)
+					diff := hRes.LastModified.Sub(*prevSt.LastModified)
+					if diff < 0 {
+						diff = -diff
+					}
+					// C# code: (lastModified - previousSummary.DataTimestamp).Duration() >= TimeSpan.FromMinutes(1)
+					rChanged = diff >= time.Minute
 				} else if hRes.LastModified != nil && prevSt.LastModified == nil {
 					rChanged = true
 				} else if hRes.ETag != "" && prevSt.ETag != "" {

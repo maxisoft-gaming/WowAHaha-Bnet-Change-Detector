@@ -171,16 +171,18 @@ func (c *Client) CheckCommoditiesHead(ctx context.Context, region string) (*Head
 	}
 
 	reqURL := BuildCommoditiesURL(region, c.cfg.Locale)
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, reqURL, nil)
+	// Use GET instead of HEAD. BNet API CDNs heavily cache or break HEAD requests.
+	// We will close the response body immediately after reading headers.
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create HEAD request: %w", err)
+		return nil, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err := c.doWithRetry(req)
 	if err != nil {
-		return nil, fmt.Errorf("HEAD request failed for region %s: %w", region, err)
+		return nil, fmt.Errorf("GET request failed for region %s: %w", region, err)
 	}
 	defer resp.Body.Close()
 

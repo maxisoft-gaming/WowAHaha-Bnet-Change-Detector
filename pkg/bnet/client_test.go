@@ -11,7 +11,7 @@ import (
 	"github.com/maxisoft-gaming/WowAHaha-Bnet-Change-Detector/pkg/output"
 )
 
-func TestClient_OAuthAndHeadCheck(t *testing.T) {
+func TestClient_OAuthAndGetCheck(t *testing.T) {
 	lmHeader := "Wed, 22 Jul 2026 18:00:00 GMT"
 	expectedLM := time.Date(2026, 7, 22, 18, 0, 0, 0, time.UTC)
 
@@ -31,7 +31,7 @@ func TestClient_OAuthAndHeadCheck(t *testing.T) {
 			fmt.Fprintln(w, `{"access_token": "mock_token_123", "token_type": "bearer", "expires_in": 3600}`)
 
 		case "/data/wow/auctions/commodities":
-			if r.Method != http.MethodHead {
+			if r.Method != http.MethodGet {
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 				return
 			}
@@ -68,8 +68,8 @@ func TestClient_OAuthAndHeadCheck(t *testing.T) {
 		t.Errorf("Expected token mock_token_123, got: %s", token)
 	}
 
-	// Test Head request against server directly
-	req, _ := http.NewRequestWithContext(ctx, http.MethodHead, server.URL+"/data/wow/auctions/commodities", nil)
+	// Test GET request against server directly
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, server.URL+"/data/wow/auctions/commodities", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err := client.doWithRetry(req)
